@@ -83,16 +83,18 @@ for _, n in {"PlutoScript_GlassUI", "NightHub_Rewrite", "Zenith_Studio_UI", "Zen
 end
 
 local function GetSafeParent(): Instance
-    if RunService:IsStudio() then
-        return StarterGui
+    local lp = Players.LocalPlayer
+    if lp and lp:FindFirstChild("PlayerGui") then
+        return lp.PlayerGui
     end
     local p = nil
     pcall(function() p = CoreGui end)
-    if not p then
-        local lp = Players.LocalPlayer
-        if lp then p = lp:WaitForChild("PlayerGui") end
+    if p and not RunService:IsStudio() then return p end
+    if lp then
+        pcall(function() p = lp:WaitForChild("PlayerGui", 1) end)
+        if p then return p end
     end
-    return p or StarterGui
+    return StarterGui
 end
 
 -- PERFECT DRAGGABLE ENGINE
@@ -1249,7 +1251,7 @@ local VirtualUser = game:GetService("VirtualUser")
 local RunService = game:GetService("RunService")
 local HttpService = game:GetService("HttpService")
 local Player = Players.LocalPlayer
-local Remotes = pcall(function() return ReplicatedStorage:WaitForChild("Remotes", 2) end) and ReplicatedStorage:FindFirstChild("Remotes") or nil
+local Remotes = ReplicatedStorage:FindFirstChild("Remotes")
 local CommF = (Remotes and Remotes:FindFirstChild("CommF_")) or nil 
 local PlayerGui = (Player and Player:FindFirstChild("PlayerGui")) or nil
 local MainGui = (PlayerGui and PlayerGui:FindFirstChild("Main")) or nil
@@ -1257,11 +1259,13 @@ local lastNotificationTime = 0
 local notificationCooldown = 10
 local currentTime = tick()
 if currentTime - lastNotificationTime >= notificationCooldown then
-    game.StarterGui:SetCore("SendNotification", {
-        Title = "",
-        Text = "Loading...",
-        Duration = 5
-    })
+    pcall(function()
+        game.StarterGui:SetCore("SendNotification", {
+            Title = "Pluto Script",
+            Text = "Loading Blox Fruits...",
+            Duration = 5
+        })
+    end)
     lastNotificationTime = currentTime
 end
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
@@ -1290,11 +1294,11 @@ if GuideModule then
     end
 end
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
-local Util = ReplicatedStorage:WaitForChild("Util", 5)
+local Util = ReplicatedStorage:FindFirstChild("Util")
 if Util then
     local CameraShaker = Util:FindFirstChild("CameraShaker")
     if CameraShaker then
-        require(CameraShaker):Stop()
+        pcall(function() require(CameraShaker):Stop() end)
     end
 end
 local placeId = game.PlaceId
