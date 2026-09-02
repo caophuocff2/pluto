@@ -1249,10 +1249,10 @@ local VirtualUser = game:GetService("VirtualUser")
 local RunService = game:GetService("RunService")
 local HttpService = game:GetService("HttpService")
 local Player = Players.LocalPlayer
-local Remotes = ReplicatedStorage:WaitForChild("Remotes", 5)
-local CommF = Remotes:WaitForChild("CommF_", 5) 
-local PlayerGui = Player:WaitForChild("PlayerGui", 5)
-local MainGui = PlayerGui:WaitForChild("Main", 5)
+local Remotes = pcall(function() return ReplicatedStorage:WaitForChild("Remotes", 2) end) and ReplicatedStorage:FindFirstChild("Remotes") or nil
+local CommF = (Remotes and Remotes:FindFirstChild("CommF_")) or nil 
+local PlayerGui = (Player and Player:FindFirstChild("PlayerGui")) or nil
+local MainGui = (PlayerGui and PlayerGui:FindFirstChild("Main")) or nil
 local lastNotificationTime = 0
 local notificationCooldown = 10
 local currentTime = tick()
@@ -1270,23 +1270,23 @@ if EffectContainer then
     local Death = EffectContainer:FindFirstChild("Death")
     if Death then
         local success, result = pcall(require, Death)
-        if success and type(result) == "function" then
-            hookfunction(result, function() end)
+        if success and type(result) == "function" and typeof(hookfunction) == "function" then
+            pcall(hookfunction, result, function() end)
         end
     end
     local Respawn = EffectContainer:FindFirstChild("Respawn")
     if Respawn then
         local success, result = pcall(require, Respawn)
-        if success and type(result) == "function" then
-            hookfunction(result, function() end)
+        if success and type(result) == "function" and typeof(hookfunction) == "function" then
+            pcall(hookfunction, result, function() end)
         end
     end
 end
 local GuideModule = ReplicatedStorage:FindFirstChild("GuideModule")
 if GuideModule then
     local success, module = pcall(require, GuideModule)
-    if success and module and type(module.ChangeDisplayedNPC) == "function" then
-        hookfunction(module.ChangeDisplayedNPC, function() end)
+    if success and module and type(module.ChangeDisplayedNPC) == "function" and typeof(hookfunction) == "function" then
+        pcall(hookfunction, module.ChangeDisplayedNPC, function() end)
     end
 end
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
@@ -1317,32 +1317,20 @@ local executor = (typeof(getexecutorname) == "function" and getexecutorname()) o
 local players = game:GetService("Players")
 local localPlayer = players.LocalPlayer
 
-if executor ~= "" then
-    local whitelistedExecutors = {
-        "Bunni", "FluxusZ", "Delta", "Arceus", "Xeno", 
-        "Swift", "Awp", "Volcano", "Argon", "Macsploit", 
-        "Potassium", "CodeX", "Velocity", "Romix"
-    }
-    
-    local isAllowed = false
-    for _, exec in ipairs(whitelistedExecutors) do
-        if string.find(executor, exec, 1, true) then
-            isAllowed = true
-            break
+-- Executor Check (Safe for Studio & All Executors)
+pcall(function()
+    if executor ~= "" then
+        print("Executor: " .. tostring(executor))
+    end
+end)
+-- Non-blocking Character check
+task.spawn(function()
+    pcall(function()
+        if game.Players.LocalPlayer then
+            repeat task.wait() until game.Players.LocalPlayer.Character
         end
-    end
-
-    if isAllowed then
-        print("ok")
-    else
-        localPlayer:Kick("not whitelist")
-    end
-else
-    localPlayer:Kick("not whitelist")
-end
-repeat
-    wait()
-until game.Players.LocalPlayer.Character
+    end)
+end)
 function CheckQuest() 
     MyLevel = game:GetService("Players").LocalPlayer.Data.Level.Value
     if World1 then
