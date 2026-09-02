@@ -13,11 +13,13 @@
 --!strict
 --[[
 ====================================================================================================
-🪐 PLUTO SCRIPT UI LIBRARY (FLUENT-COMPATIBLE REWRITE) 🪐
+🪐 PLUTO SCRIPT UI LIBRARY (REFINED GLASSMORPHISM EDITION) 🪐
 ====================================================================================================
 - Acrylic Frosted Glassmorphism Theme (#0E1117 / 82% Transparency)
 - 100% Vector Lucide Icons (rbxassetid)
 - Custom Procedural Planet Logo (Pluto Sphere + Orbit Ring)
+- Generous 680x440 Window Dimensions & 175px Sidebar
+- Automatic Title Sanitization & Emerald Active Tab Accents
 - Strict LayoutOrder (100% preserved insertion order for all controls)
 - Perfect Draggable Engine (Header & Floating Minimized Logo)
 - 100% Fluent / Redz API Compatibility
@@ -51,27 +53,41 @@ Pluto.Icons = {
     ChevronDown = "rbxassetid://10709790948"
 }
 
-local function ResolveIcon(iconNameOrId: string?): string
-    if not iconNameOrId or iconNameOrId == "" then
-        return Pluto.Icons.Zap
+local function SanitizeTabTitle(rawTitle: string): string
+    if not rawTitle then return "Tab" end
+    local clean = rawTitle:match("^%s*(.-)%s*$") or rawTitle
+    -- Replace redundant prefixes
+    clean = clean:gsub("^[Tt][Aa][Bb]%s+", "")
+    clean = clean:gsub("^Setting%s+", "")
+    if clean == "Shop" or clean == "Tab Shop" then return "Shop"
+    elseif clean:find("Status") or clean:find("Server") then return "Status & Server"
+    elseif clean:find("Local Player") or clean:find("Player") then return "Local Player"
+    elseif clean:find("Setting Farm") or clean:find("Settings") then return "Farm Settings"
+    elseif clean:find("Hold") or clean:find("Skill") then return "Skills & Hold"
+    elseif clean:find("Stack") then return "Stack Farm"
+    elseif clean:find("Farm") or clean:find("Farming") then return "Farming"
     end
-    local lower = string.lower(iconNameOrId)
-    if string.find(lower, "shop") or string.find(lower, "cart") or string.find(lower, "🛒") then
+    return clean
+end
+
+local function ResolveIcon(title: string, rawIcon: string?): string
+    local combined = string.lower((title or "") .. " " .. (rawIcon or ""))
+    if combined:find("shop") or combined:find("cart") or combined:find("🛒") then
         return Pluto.Icons.Shopping
-    elseif string.find(lower, "server") or string.find(lower, "status") or string.find(lower, "🌊") or string.find(lower, "activity") then
+    elseif combined:find("server") or combined:find("status") or combined:find("🌊") or combined:find("activity") then
         return Pluto.Icons.Server
-    elseif string.find(lower, "user") or string.find(lower, "player") or string.find(lower, "🦹") then
+    elseif combined:find("user") or combined:find("player") or combined:find("🦹") then
         return Pluto.Icons.User
-    elseif string.find(lower, "setting") or string.find(lower, "⚙") then
+    elseif combined:find("setting") or combined:find("gear") or combined:find("⚙") then
         return Pluto.Icons.Settings
-    elseif string.find(lower, "skill") or string.find(lower, "wave") then
+    elseif combined:find("skill") or combined:find("hold") or combined:find("wave") then
         return Pluto.Icons.Wave
-    elseif string.find(lower, "stack") or string.find(lower, "sword") or string.find(lower, "💫") then
+    elseif combined:find("stack") or combined:find("sword") or combined:find("💫") then
         return Pluto.Icons.Swords
-    elseif string.find(lower, "farm") or string.find(lower, "⚡") or string.find(lower, "leaf") then
+    elseif combined:find("farm") or combined:find("⚡") or combined:find("leaf") then
         return Pluto.Icons.Zap
-    elseif string.find(lower, "rbxassetid://") then
-        return iconNameOrId
+    elseif rawIcon and rawIcon:find("rbxassetid://") then
+        return rawIcon
     end
     return Pluto.Icons.Zap
 end
@@ -149,11 +165,11 @@ end
 
 function Pluto:CreateWindow(config)
     config = config or {}
-    local TitleText = config.Title or "Pluto Script"
-    local SubTitleText = config.SubTitle or "Welcome to Nextgen Script."
+    local TitleText = "Pluto Script"
+    local SubTitleText = "Blox Fruits Complete Hub"
     local GameText = "Game: Blox Fruit"
-    local VerText = "Version: Rewrite"
-    local WinSize = config.Size or UDim2.new(0, 680, 0, 440)
+    local VerText = "Version: 3.0 Pro"
+    local WinSize = UDim2.new(0, 680, 0, 440) -- Generous & non-cramped size
 
     local ScreenGui = Instance.new("ScreenGui")
     ScreenGui.Name = "PlutoScript_GlassUI"
@@ -186,7 +202,7 @@ function Pluto:CreateWindow(config)
     local FloatingBtn = Instance.new("Frame")
     FloatingBtn.Name = "FloatingToggleBtn"
     FloatingBtn.Size = UDim2.new(0, 48, 0, 48)
-    FloatingBtn.Position = UDim2.new(0, 30, 0.5, -24)
+    FloatingBtn.Position = UDim2.new(0, 25, 0.35, 0)
     FloatingBtn.BackgroundColor3 = Color3.fromRGB(14, 17, 23)
     FloatingBtn.BackgroundTransparency = 0.18
     FloatingBtn.BorderSizePixel = 0
@@ -198,9 +214,9 @@ function Pluto:CreateWindow(config)
     FloatCorner.Parent = FloatingBtn
 
     local FloatStroke = Instance.new("UIStroke")
-    FloatStroke.Color = Color3.fromRGB(255, 255, 255)
+    FloatStroke.Color = Color3.fromRGB(52, 211, 153)
     FloatStroke.Thickness = 1.2
-    FloatStroke.Transparency = 0.78
+    FloatStroke.Transparency = 0.65
     FloatStroke.Parent = FloatingBtn
 
     local FloatLogo = Instance.new("Frame")
@@ -276,7 +292,7 @@ function Pluto:CreateWindow(config)
     -- TOPBAR HEADER
     local Header = Instance.new("Frame")
     Header.Name = "Header"
-    Header.Size = UDim2.new(1, 0, 0, 85)
+    Header.Size = UDim2.new(1, 0, 0, 78)
     Header.BackgroundTransparency = 1
     Header.Parent = MainWindow
 
@@ -285,7 +301,7 @@ function Pluto:CreateWindow(config)
     -- 3 MACOS TRAFFIC LIGHTS
     local DotRed = Instance.new("TextButton")
     DotRed.Size = UDim2.new(0, 11, 0, 11)
-    DotRed.Position = UDim2.new(0, 22, 0, 20)
+    DotRed.Position = UDim2.new(0, 20, 0, 16)
     DotRed.BackgroundColor3 = Color3.fromRGB(239, 68, 68)
     DotRed.Text = ""
     local C1 = Instance.new("UICorner")
@@ -303,7 +319,7 @@ function Pluto:CreateWindow(config)
 
     local DotYellow = Instance.new("TextButton")
     DotYellow.Size = UDim2.new(0, 11, 0, 11)
-    DotYellow.Position = UDim2.new(0, 39, 0, 20)
+    DotYellow.Position = UDim2.new(0, 37, 0, 16)
     DotYellow.BackgroundColor3 = Color3.fromRGB(245, 158, 11)
     DotYellow.Text = ""
     local C2 = Instance.new("UICorner")
@@ -314,7 +330,7 @@ function Pluto:CreateWindow(config)
 
     local DotGreen = Instance.new("TextButton")
     DotGreen.Size = UDim2.new(0, 11, 0, 11)
-    DotGreen.Position = UDim2.new(0, 56, 0, 20)
+    DotGreen.Position = UDim2.new(0, 54, 0, 16)
     DotGreen.BackgroundColor3 = Color3.fromRGB(34, 197, 94)
     DotGreen.Text = ""
     local C3 = Instance.new("UICorner")
@@ -330,7 +346,7 @@ function Pluto:CreateWindow(config)
     -- PROCEDURAL PLANET LOGO
     local LogoContainer = Instance.new("Frame")
     LogoContainer.Size = UDim2.new(0, 22, 0, 22)
-    LogoContainer.Position = UDim2.new(0, 22, 0, 40)
+    LogoContainer.Position = UDim2.new(0, 20, 0, 38)
     LogoContainer.BackgroundTransparency = 1
     LogoContainer.Parent = Header
 
@@ -359,37 +375,37 @@ function Pluto:CreateWindow(config)
     PlanetRing.Parent = LogoContainer
 
     local Title = Instance.new("TextLabel")
-    Title.Position = UDim2.new(0, 50, 0, 39)
-    Title.Size = UDim2.new(0, 160, 0, 22)
+    Title.Position = UDim2.new(0, 48, 0, 36)
+    Title.Size = UDim2.new(0, 130, 0, 22)
     Title.BackgroundTransparency = 1
     Title.Font = Enum.Font.GothamBold
-    Title.Text = "Pluto Script"
+    Title.Text = TitleText
     Title.TextColor3 = Color3.fromRGB(255, 255, 255)
-    Title.TextSize = 15.5
+    Title.TextSize = 15
     Title.TextXAlignment = Enum.TextXAlignment.Left
     Title.Parent = Header
 
     local Subtitle = Instance.new("TextLabel")
-    Subtitle.Position = UDim2.new(0, 50, 0, 60)
-    Subtitle.Size = UDim2.new(0, 170, 0, 16)
+    Subtitle.Position = UDim2.new(0, 48, 0, 56)
+    Subtitle.Size = UDim2.new(0, 130, 0, 16)
     Subtitle.BackgroundTransparency = 1
     Subtitle.Font = Enum.Font.Gotham
-    Subtitle.Text = "Blox Fruits Complete Hub"
+    Subtitle.Text = SubTitleText
     Subtitle.TextColor3 = Color3.fromRGB(148, 163, 184)
-    Subtitle.TextSize = 10.5
+    Subtitle.TextSize = 9.5
     Subtitle.TextXAlignment = Enum.TextXAlignment.Left
     Subtitle.Parent = Header
 
     -- BADGES
     local BadgeContainer = Instance.new("Frame")
-    BadgeContainer.Position = UDim2.new(0, 225, 0, 14)
-    BadgeContainer.Size = UDim2.new(0, 240, 0, 65)
+    BadgeContainer.Position = UDim2.new(0, 185, 0, 12)
+    BadgeContainer.Size = UDim2.new(0, 240, 0, 60)
     BadgeContainer.BackgroundTransparency = 1
     BadgeContainer.Parent = Header
 
     local BadgeGame = Instance.new("Frame")
-    BadgeGame.Size = UDim2.new(0, 115, 0, 26)
-    BadgeGame.Position = UDim2.new(0, 0, 0, 0)
+    BadgeGame.Size = UDim2.new(0, 115, 0, 24)
+    BadgeGame.Position = UDim2.new(0, 0, 0, 2)
     BadgeGame.BackgroundColor3 = Color3.fromRGB(6, 78, 59)
     BadgeGame.BackgroundTransparency = 0.35
     local BG1 = Instance.new("UICorner")
@@ -405,13 +421,13 @@ function Pluto:CreateWindow(config)
     LabelG.Font = Enum.Font.GothamBold
     LabelG.Text = GameText
     LabelG.TextColor3 = Color3.fromRGB(52, 211, 153)
-    LabelG.TextSize = 10.5
+    LabelG.TextSize = 10
     LabelG.Parent = BadgeGame
     BadgeGame.Parent = BadgeContainer
 
     local BadgeVer = Instance.new("Frame")
-    BadgeVer.Size = UDim2.new(0, 115, 0, 26)
-    BadgeVer.Position = UDim2.new(0, 0, 0, 32)
+    BadgeVer.Size = UDim2.new(0, 115, 0, 24)
+    BadgeVer.Position = UDim2.new(0, 0, 0, 30)
     BadgeVer.BackgroundColor3 = Color3.fromRGB(30, 41, 59)
     BadgeVer.BackgroundTransparency = 0.35
     local BG2 = Instance.new("UICorner")
@@ -427,20 +443,20 @@ function Pluto:CreateWindow(config)
     LabelV.Font = Enum.Font.GothamBold
     LabelV.Text = VerText
     LabelV.TextColor3 = Color3.fromRGB(241, 245, 249)
-    LabelV.TextSize = 10.5
+    LabelV.TextSize = 10
     LabelV.Parent = BadgeVer
     BadgeVer.Parent = BadgeContainer
 
     -- TOP-RIGHT ACTIONS (MINIMIZE & CLOSE BUTTONS)
     local ActionButtons = Instance.new("Frame")
     ActionButtons.Name = "ActionButtons"
-    ActionButtons.Size = UDim2.new(0, 68, 0, 30)
-    ActionButtons.Position = UDim2.new(1, -85, 0, 16)
+    ActionButtons.Size = UDim2.new(0, 68, 0, 28)
+    ActionButtons.Position = UDim2.new(1, -80, 0, 14)
     ActionButtons.BackgroundTransparency = 1
     ActionButtons.Parent = Header
 
     local MinBtn = Instance.new("TextButton")
-    MinBtn.Size = UDim2.new(0, 30, 0, 30)
+    MinBtn.Size = UDim2.new(0, 28, 0, 28)
     MinBtn.BackgroundColor3 = Color3.fromRGB(30, 41, 59)
     MinBtn.BackgroundTransparency = 0.35
     MinBtn.Text = ""
@@ -455,8 +471,8 @@ function Pluto:CreateWindow(config)
     MBStroke.Parent = MinBtn
 
     local MinIcon = Instance.new("ImageLabel")
-    MinIcon.Size = UDim2.new(0, 16, 0, 16)
-    MinIcon.Position = UDim2.new(0.5, -8, 0.5, -8)
+    MinIcon.Size = UDim2.new(0, 14, 0, 14)
+    MinIcon.Position = UDim2.new(0.5, -7, 0.5, -7)
     MinIcon.BackgroundTransparency = 1
     MinIcon.Image = Pluto.Icons.Minus
     MinIcon.ImageColor3 = Color3.fromRGB(203, 213, 225)
@@ -465,8 +481,8 @@ function Pluto:CreateWindow(config)
     MinBtn.MouseButton1Click:Connect(ToggleMinimize)
 
     local CloseBtn = Instance.new("TextButton")
-    CloseBtn.Size = UDim2.new(0, 30, 0, 30)
-    CloseBtn.Position = UDim2.new(0, 36, 0, 0)
+    CloseBtn.Size = UDim2.new(0, 28, 0, 28)
+    CloseBtn.Position = UDim2.new(0, 34, 0, 0)
     CloseBtn.BackgroundColor3 = Color3.fromRGB(239, 68, 68)
     CloseBtn.BackgroundTransparency = 0.3
     CloseBtn.Text = ""
@@ -481,8 +497,8 @@ function Pluto:CreateWindow(config)
     CBStroke.Parent = CloseBtn
 
     local CloseIcon = Instance.new("ImageLabel")
-    CloseIcon.Size = UDim2.new(0, 14, 0, 14)
-    CloseIcon.Position = UDim2.new(0.5, -7, 0.5, -7)
+    CloseIcon.Size = UDim2.new(0, 13, 0, 13)
+    CloseIcon.Position = UDim2.new(0.5, -6.5, 0.5, -6.5)
     CloseIcon.BackgroundTransparency = 1
     CloseIcon.Image = Pluto.Icons.Close
     CloseIcon.ImageColor3 = Color3.fromRGB(255, 255, 255)
@@ -500,15 +516,15 @@ function Pluto:CreateWindow(config)
     -- DIVIDERS
     local HeaderDivider = Instance.new("Frame")
     HeaderDivider.Size = UDim2.new(1, 0, 0, 1)
-    HeaderDivider.Position = UDim2.new(0, 0, 0, 85)
+    HeaderDivider.Position = UDim2.new(0, 0, 0, 78)
     HeaderDivider.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
     HeaderDivider.BackgroundTransparency = 0.92
     HeaderDivider.BorderSizePixel = 0
     HeaderDivider.Parent = MainWindow
 
     local VerticalDivider = Instance.new("Frame")
-    VerticalDivider.Size = UDim2.new(0, 1, 1, -85)
-    VerticalDivider.Position = UDim2.new(0, 200, 0, 85)
+    VerticalDivider.Size = UDim2.new(0, 1, 1, -78)
+    VerticalDivider.Position = UDim2.new(0, 175, 0, 78)
     VerticalDivider.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
     VerticalDivider.BackgroundTransparency = 0.92
     VerticalDivider.BorderSizePixel = 0
@@ -517,8 +533,8 @@ function Pluto:CreateWindow(config)
     -- SIDEBAR
     local Sidebar = Instance.new("ScrollingFrame")
     Sidebar.Name = "Sidebar"
-    Sidebar.Position = UDim2.new(0, 0, 0, 86)
-    Sidebar.Size = UDim2.new(0, 200, 1, -86)
+    Sidebar.Position = UDim2.new(0, 0, 0, 79)
+    Sidebar.Size = UDim2.new(0, 175, 1, -79)
     Sidebar.BackgroundTransparency = 1
     Sidebar.BorderSizePixel = 0
     Sidebar.ScrollBarThickness = 2
@@ -526,14 +542,14 @@ function Pluto:CreateWindow(config)
     Sidebar.Parent = MainWindow
 
     local SideLayout = Instance.new("UIListLayout")
-    SideLayout.Padding = UDim.new(0, 5)
+    SideLayout.Padding = UDim.new(0, 4)
     SideLayout.HorizontalAlignment = Enum.HorizontalAlignment.Center
     SideLayout.SortOrder = Enum.SortOrder.LayoutOrder
     SideLayout.Parent = Sidebar
 
     local SidePad = Instance.new("UIPadding")
-    SidePad.PaddingTop = UDim.new(0, 10)
-    SidePad.PaddingBottom = UDim.new(0, 10)
+    SidePad.PaddingTop = UDim.new(0, 8)
+    SidePad.PaddingBottom = UDim.new(0, 8)
     SidePad.Parent = Sidebar
 
     SideLayout:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(function()
@@ -543,8 +559,8 @@ function Pluto:CreateWindow(config)
     -- CONTENT AREA
     local ContentArea = Instance.new("Frame")
     ContentArea.Name = "ContentArea"
-    ContentArea.Position = UDim2.new(0, 201, 0, 86)
-    ContentArea.Size = UDim2.new(1, -201, 1, -86)
+    ContentArea.Position = UDim2.new(0, 176, 0, 79)
+    ContentArea.Size = UDim2.new(1, -176, 1, -79)
     ContentArea.BackgroundTransparency = 1
     ContentArea.Parent = MainWindow
 
@@ -560,52 +576,52 @@ function Pluto:CreateWindow(config)
 
     function WindowObj:AddTab(tabConfig)
         tabConfig = tabConfig or {}
-        local tabTitle = tabConfig.Title or "Tab"
-        local rawIcon = tabConfig.Icon or "Zap"
-        local tabIcon = ResolveIcon(rawIcon)
+        local rawTitle = tabConfig.Title or "Tab"
+        local cleanTitle = SanitizeTabTitle(rawTitle)
+        local tabIcon = ResolveIcon(cleanTitle, tabConfig.Icon)
         local isFirst = (#self.Tabs == 0)
 
         tabOrder = tabOrder + 1
 
         local btn = Instance.new("TextButton")
-        btn.Size = UDim2.new(0.9, 0, 0, 38)
+        btn.Size = UDim2.new(0.92, 0, 0, 36)
         btn.BackgroundColor3 = isFirst and Color3.fromRGB(30, 41, 59) or Color3.fromRGB(14, 17, 23)
-        btn.BackgroundTransparency = isFirst and 0.4 or 1
+        btn.BackgroundTransparency = isFirst and 0.25 or 1
         btn.Text = ""
         btn.AutoButtonColor = false
         btn.LayoutOrder = tabOrder
         local bCorner = Instance.new("UICorner")
-        bCorner.CornerRadius = UDim.new(0, 9)
+        bCorner.CornerRadius = UDim.new(0, 8)
         bCorner.Parent = btn
 
         local bStroke = Instance.new("UIStroke")
-        bStroke.Color = Color3.fromRGB(255, 255, 255)
-        bStroke.Transparency = isFirst and 0.85 or 1
+        bStroke.Color = isFirst and Color3.fromRGB(52, 211, 153) or Color3.fromRGB(255, 255, 255)
+        bStroke.Transparency = isFirst and 0.7 or 1
         bStroke.Parent = btn
 
         local iconImg = Instance.new("ImageLabel")
         iconImg.Size = UDim2.new(0, 16, 0, 16)
-        iconImg.Position = UDim2.new(0, 12, 0.5, -8)
+        iconImg.Position = UDim2.new(0, 10, 0.5, -8)
         iconImg.BackgroundTransparency = 1
         iconImg.Image = tabIcon
-        iconImg.ImageColor3 = isFirst and Color3.fromRGB(255, 255, 255) or Color3.fromRGB(148, 163, 184)
+        iconImg.ImageColor3 = isFirst and Color3.fromRGB(52, 211, 153) or Color3.fromRGB(148, 163, 184)
         iconImg.Parent = btn
 
         local textLbl = Instance.new("TextLabel")
-        textLbl.Size = UDim2.new(1, -45, 1, 0)
-        textLbl.Position = UDim2.new(0, 36, 0, 0)
+        textLbl.Size = UDim2.new(1, -34, 1, 0)
+        textLbl.Position = UDim2.new(0, 32, 0, 0)
         textLbl.BackgroundTransparency = 1
-        textLbl.Font = Enum.Font.GothamMedium
-        textLbl.Text = tabTitle
+        textLbl.Font = Enum.Font.GothamBold
+        textLbl.Text = cleanTitle
         textLbl.TextColor3 = isFirst and Color3.fromRGB(255, 255, 255) or Color3.fromRGB(148, 163, 184)
-        textLbl.TextSize = 12
+        textLbl.TextSize = 11.5
         textLbl.TextXAlignment = Enum.TextXAlignment.Left
         textLbl.Parent = btn
         btn.Parent = Sidebar
 
         local page = Instance.new("ScrollingFrame")
-        page.Size = UDim2.new(1, -20, 1, -20)
-        page.Position = UDim2.new(0, 10, 0, 10)
+        page.Size = UDim2.new(1, -16, 1, -16)
+        page.Position = UDim2.new(0, 8, 0, 8)
         page.BackgroundTransparency = 1
         page.BorderSizePixel = 0
         page.ScrollBarThickness = 3
@@ -614,12 +630,12 @@ function Pluto:CreateWindow(config)
         page.Parent = ContentArea
 
         local pLayout = Instance.new("UIListLayout")
-        pLayout.Padding = UDim.new(0, 8)
+        pLayout.Padding = UDim.new(0, 6)
         pLayout.SortOrder = Enum.SortOrder.LayoutOrder
         pLayout.Parent = page
 
         local pPad = Instance.new("UIPadding")
-        pPad.PaddingRight = UDim.new(0, 6)
+        pPad.PaddingRight = UDim.new(0, 4)
         pPad.Parent = page
 
         pLayout:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(function()
@@ -643,9 +659,10 @@ function Pluto:CreateWindow(config)
                 t.text.TextColor3 = Color3.fromRGB(148, 163, 184)
             end
             page.Visible = true
-            btn.BackgroundTransparency = 0.4
-            bStroke.Transparency = 0.85
-            iconImg.ImageColor3 = Color3.fromRGB(255, 255, 255)
+            btn.BackgroundTransparency = 0.25
+            bStroke.Color = Color3.fromRGB(52, 211, 153)
+            bStroke.Transparency = 0.7
+            iconImg.ImageColor3 = Color3.fromRGB(52, 211, 153)
             textLbl.TextColor3 = Color3.fromRGB(255, 255, 255)
         end)
 
@@ -664,7 +681,7 @@ function Pluto:CreateWindow(config)
 
             itemOrder = itemOrder + 1
 
-            local cardHeight = (tDesc ~= "") and 54 or 44
+            local cardHeight = (tDesc ~= "") and 54 or 42
             local card = Instance.new("Frame")
             card.Size = UDim2.new(1, 0, 0, cardHeight)
             card.BackgroundColor3 = Color3.fromRGB(24, 30, 42)
@@ -672,7 +689,7 @@ function Pluto:CreateWindow(config)
             card.BorderSizePixel = 0
             card.LayoutOrder = itemOrder
             local cCorner = Instance.new("UICorner")
-            cCorner.CornerRadius = UDim.new(0, 10)
+            cCorner.CornerRadius = UDim.new(0, 8)
             cCorner.Parent = card
             local cStroke = Instance.new("UIStroke")
             cStroke.Color = Color3.fromRGB(255, 255, 255)
@@ -681,7 +698,7 @@ function Pluto:CreateWindow(config)
             card.Parent = page
 
             local titleLbl = Instance.new("TextLabel")
-            titleLbl.Position = UDim2.new(0, 14, 0, (tDesc ~= "") and 8 or 12)
+            titleLbl.Position = UDim2.new(0, 14, 0, (tDesc ~= "") and 8 or 11)
             titleLbl.Size = UDim2.new(1, -74, 0, 18)
             titleLbl.BackgroundTransparency = 1
             titleLbl.Font = Enum.Font.GothamBold
@@ -707,8 +724,8 @@ function Pluto:CreateWindow(config)
             end
 
             local switch = Instance.new("TextButton")
-            switch.Position = UDim2.new(1, -54, 0.5, -12)
-            switch.Size = UDim2.new(0, 42, 0, 24)
+            switch.Position = UDim2.new(1, -52, 0.5, -11)
+            switch.Size = UDim2.new(0, 40, 0, 22)
             switch.BackgroundColor3 = tDefault and Color3.fromRGB(34, 197, 94) or Color3.fromRGB(51, 65, 85)
             switch.Text = ""
             switch.AutoButtonColor = false
@@ -718,8 +735,8 @@ function Pluto:CreateWindow(config)
             switch.Parent = card
 
             local knob = Instance.new("Frame")
-            knob.Size = UDim2.new(0, 18, 0, 18)
-            knob.Position = tDefault and UDim2.new(1, -21, 0.5, -9) or UDim2.new(0, 3, 0.5, -9)
+            knob.Size = UDim2.new(0, 16, 0, 16)
+            knob.Position = tDefault and UDim2.new(1, -19, 0.5, -8) or UDim2.new(0, 3, 0.5, -8)
             knob.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
             local kCorner = Instance.new("UICorner")
             kCorner.CornerRadius = UDim.new(1, 0)
@@ -732,7 +749,7 @@ function Pluto:CreateWindow(config)
             local function SetState(val)
                 state = val
                 toggleObj.Value = val
-                local knobPos = state and UDim2.new(1, -21, 0.5, -9) or UDim2.new(0, 3, 0.5, -9)
+                local knobPos = state and UDim2.new(1, -19, 0.5, -8) or UDim2.new(0, 3, 0.5, -8)
                 local bg = state and Color3.fromRGB(34, 197, 94) or Color3.fromRGB(51, 65, 85)
                 TweenService:Create(knob, TweenInfo.new(0.2, Enum.EasingStyle.Quart, Enum.EasingDirection.Out), {Position = knobPos}):Play()
                 TweenService:Create(switch, TweenInfo.new(0.2, Enum.EasingStyle.Quart, Enum.EasingDirection.Out), {BackgroundColor3 = bg}):Play()
@@ -762,14 +779,14 @@ function Pluto:CreateWindow(config)
             itemOrder = itemOrder + 1
 
             local btn = Instance.new("TextButton")
-            btn.Size = UDim2.new(1, 0, 0, 42)
+            btn.Size = UDim2.new(1, 0, 0, 40)
             btn.BackgroundColor3 = Color3.fromRGB(24, 30, 42)
             btn.BackgroundTransparency = 0.35
             btn.Text = ""
             btn.AutoButtonColor = false
             btn.LayoutOrder = itemOrder
             local cCorner = Instance.new("UICorner")
-            cCorner.CornerRadius = UDim.new(0, 10)
+            cCorner.CornerRadius = UDim.new(0, 8)
             cCorner.Parent = btn
             local cStroke = Instance.new("UIStroke")
             cStroke.Color = Color3.fromRGB(255, 255, 255)
@@ -808,14 +825,14 @@ function Pluto:CreateWindow(config)
             itemOrder = itemOrder + 1
 
             local card = Instance.new("Frame")
-            card.Size = UDim2.new(1, 0, 0, 44)
+            card.Size = UDim2.new(1, 0, 0, 42)
             card.BackgroundColor3 = Color3.fromRGB(24, 30, 42)
             card.BackgroundTransparency = 0.35
             card.BorderSizePixel = 0
             card.ClipsDescendants = true
             card.LayoutOrder = itemOrder
             local cCorner = Instance.new("UICorner")
-            cCorner.CornerRadius = UDim.new(0, 10)
+            cCorner.CornerRadius = UDim.new(0, 8)
             cCorner.Parent = card
             local cStroke = Instance.new("UIStroke")
             cStroke.Color = Color3.fromRGB(255, 255, 255)
@@ -824,7 +841,7 @@ function Pluto:CreateWindow(config)
             card.Parent = page
 
             local titleLbl = Instance.new("TextLabel")
-            titleLbl.Position = UDim2.new(0, 14, 0, 12)
+            titleLbl.Position = UDim2.new(0, 14, 0, 11)
             titleLbl.Size = UDim2.new(0.48, 0, 0, 20)
             titleLbl.BackgroundTransparency = 1
             titleLbl.Font = Enum.Font.GothamBold
@@ -835,7 +852,7 @@ function Pluto:CreateWindow(config)
             titleLbl.Parent = card
 
             local dropBtn = Instance.new("TextButton")
-            dropBtn.Position = UDim2.new(0.50, 0, 0, 8)
+            dropBtn.Position = UDim2.new(0.50, 0, 0, 7)
             dropBtn.Size = UDim2.new(0.46, 0, 0, 28)
             dropBtn.BackgroundColor3 = Color3.fromRGB(30, 41, 59)
             dropBtn.BackgroundTransparency = 0.4
@@ -849,7 +866,7 @@ function Pluto:CreateWindow(config)
             dropBtn.Parent = card
 
             local dropList = Instance.new("Frame")
-            dropList.Position = UDim2.new(0, 10, 0, 44)
+            dropList.Position = UDim2.new(0, 10, 0, 42)
             dropList.Size = UDim2.new(1, -20, 0, 0)
             dropList.BackgroundTransparency = 1
             dropList.Parent = card
@@ -884,7 +901,7 @@ function Pluto:CreateWindow(config)
                         dropObj.Value = item
                         dropBtn.Text = tostring(item)
                         isOpen = false
-                        TweenService:Create(card, TweenInfo.new(0.2), {Size = UDim2.new(1, 0, 0, 44)}):Play()
+                        TweenService:Create(card, TweenInfo.new(0.2), {Size = UDim2.new(1, 0, 0, 42)}):Play()
                         if dCallback then pcall(dCallback, item) end
                         if dropObj.OnChangedFunc then pcall(dropObj.OnChangedFunc, item) end
                     end)
@@ -894,7 +911,7 @@ function Pluto:CreateWindow(config)
 
             dropBtn.MouseButton1Click:Connect(function()
                 isOpen = not isOpen
-                local targetH = isOpen and (48 + #dValues * 30) or 44
+                local targetH = isOpen and (46 + #dValues * 30) or 42
                 TweenService:Create(card, TweenInfo.new(0.25, Enum.EasingStyle.Quart, Enum.EasingDirection.Out), {Size = UDim2.new(1, 0, 0, targetH)}):Play()
             end)
 
@@ -925,13 +942,13 @@ function Pluto:CreateWindow(config)
             itemOrder = itemOrder + 1
 
             local card = Instance.new("Frame")
-            card.Size = UDim2.new(1, 0, 0, 56)
+            card.Size = UDim2.new(1, 0, 0, 52)
             card.BackgroundColor3 = Color3.fromRGB(24, 30, 42)
             card.BackgroundTransparency = 0.35
             card.BorderSizePixel = 0
             card.LayoutOrder = itemOrder
             local cCorner = Instance.new("UICorner")
-            cCorner.CornerRadius = UDim.new(0, 10)
+            cCorner.CornerRadius = UDim.new(0, 8)
             cCorner.Parent = card
             local cStroke = Instance.new("UIStroke")
             cStroke.Color = Color3.fromRGB(255, 255, 255)
@@ -940,7 +957,7 @@ function Pluto:CreateWindow(config)
             card.Parent = page
 
             local titleLbl = Instance.new("TextLabel")
-            titleLbl.Position = UDim2.new(0, 14, 0, 8)
+            titleLbl.Position = UDim2.new(0, 14, 0, 7)
             titleLbl.Size = UDim2.new(0.7, 0, 0, 18)
             titleLbl.BackgroundTransparency = 1
             titleLbl.Font = Enum.Font.GothamBold
@@ -951,7 +968,7 @@ function Pluto:CreateWindow(config)
             titleLbl.Parent = card
 
             local valLbl = Instance.new("TextLabel")
-            valLbl.Position = UDim2.new(0.7, 0, 0, 8)
+            valLbl.Position = UDim2.new(0.7, 0, 0, 7)
             valLbl.Size = UDim2.new(0.3, -14, 0, 18)
             valLbl.BackgroundTransparency = 1
             valLbl.Font = Enum.Font.GothamBold
@@ -962,7 +979,7 @@ function Pluto:CreateWindow(config)
             valLbl.Parent = card
 
             local barBg = Instance.new("Frame")
-            barBg.Position = UDim2.new(0, 14, 0, 36)
+            barBg.Position = UDim2.new(0, 14, 0, 32)
             barBg.Size = UDim2.new(1, -28, 0, 8)
             barBg.BackgroundColor3 = Color3.fromRGB(51, 65, 85)
             local bgCorner = Instance.new("UICorner")
@@ -1031,7 +1048,6 @@ function Pluto:CreateWindow(config)
 
             itemOrder = itemOrder + 1
 
-            -- IF EMPTY CONTENT: RENDER AS SECTION SEPARATOR
             if pDesc == "" or pDesc == nil then
                 local frame = Instance.new("Frame")
                 frame.Size = UDim2.new(1, 0, 0, 24)
@@ -1040,7 +1056,7 @@ function Pluto:CreateWindow(config)
                 frame.Parent = page
 
                 local line1 = Instance.new("Frame")
-                line1.Size = UDim2.new(0.25, 0, 0, 1)
+                line1.Size = UDim2.new(0.24, 0, 0, 1)
                 line1.Position = UDim2.new(0, 0, 0.5, 0)
                 line1.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
                 line1.BackgroundTransparency = 0.9
@@ -1048,8 +1064,8 @@ function Pluto:CreateWindow(config)
                 line1.Parent = frame
 
                 local label = Instance.new("TextLabel")
-                label.Size = UDim2.new(0.5, 0, 1, 0)
-                label.Position = UDim2.new(0.25, 0, 0, 0)
+                label.Size = UDim2.new(0.52, 0, 1, 0)
+                label.Position = UDim2.new(0.24, 0, 0, 0)
                 label.BackgroundTransparency = 1
                 label.Font = Enum.Font.GothamBold
                 label.Text = pTitle
@@ -1058,8 +1074,8 @@ function Pluto:CreateWindow(config)
                 label.Parent = frame
 
                 local line2 = Instance.new("Frame")
-                line2.Size = UDim2.new(0.25, 0, 0, 1)
-                line2.Position = UDim2.new(0.75, 0, 0.5, 0)
+                line2.Size = UDim2.new(0.24, 0, 0, 1)
+                line2.Position = UDim2.new(0.76, 0, 0.5, 0)
                 line2.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
                 line2.BackgroundTransparency = 0.9
                 line2.BorderSizePixel = 0
@@ -1069,21 +1085,19 @@ function Pluto:CreateWindow(config)
                 function paraObj:SetTitle(t) label.Text = t end
                 function paraObj:SetDesc(d)
                     if d and d ~= "" then
-                        -- Convert to normal text card if desc becomes non-empty
                         label.Text = pTitle .. ": " .. d
                     end
                 end
                 return paraObj
             else
-                -- RENDER AS STATUS CARD
                 local card = Instance.new("Frame")
-                card.Size = UDim2.new(1, 0, 0, 52)
+                card.Size = UDim2.new(1, 0, 0, 48)
                 card.BackgroundColor3 = Color3.fromRGB(24, 30, 42)
                 card.BackgroundTransparency = 0.35
                 card.BorderSizePixel = 0
                 card.LayoutOrder = itemOrder
                 local cCorner = Instance.new("UICorner")
-                cCorner.CornerRadius = UDim.new(0, 10)
+                cCorner.CornerRadius = UDim.new(0, 8)
                 cCorner.Parent = card
                 local cStroke = Instance.new("UIStroke")
                 cStroke.Color = Color3.fromRGB(255, 255, 255)
@@ -1092,7 +1106,7 @@ function Pluto:CreateWindow(config)
                 card.Parent = page
 
                 local titleLbl = Instance.new("TextLabel")
-                titleLbl.Position = UDim2.new(0, 14, 0, 7)
+                titleLbl.Position = UDim2.new(0, 14, 0, 6)
                 titleLbl.Size = UDim2.new(1, -28, 0, 18)
                 titleLbl.BackgroundTransparency = 1
                 titleLbl.Font = Enum.Font.GothamBold
@@ -1103,16 +1117,14 @@ function Pluto:CreateWindow(config)
                 titleLbl.Parent = card
 
                 local descLbl = Instance.new("TextLabel")
-                descLbl.Position = UDim2.new(0, 14, 0, 26)
-                descLbl.Size = UDim2.new(1, -28, 0, 20)
+                descLbl.Position = UDim2.new(0, 14, 0, 25)
+                descLbl.Size = UDim2.new(1, -28, 0, 18)
                 descLbl.BackgroundTransparency = 1
                 descLbl.Font = Enum.Font.Gotham
                 descLbl.Text = pDesc
                 descLbl.TextColor3 = Color3.fromRGB(148, 163, 184)
                 descLbl.TextSize = 10
                 descLbl.TextXAlignment = Enum.TextXAlignment.Left
-                descLbl.TextYAlignment = Enum.TextYAlignment.Top
-                descLbl.TextWrapped = true
                 descLbl.Parent = card
 
                 local paraObj = {}
@@ -1133,13 +1145,13 @@ function Pluto:CreateWindow(config)
             itemOrder = itemOrder + 1
 
             local card = Instance.new("Frame")
-            card.Size = UDim2.new(1, 0, 0, 48)
+            card.Size = UDim2.new(1, 0, 0, 44)
             card.BackgroundColor3 = Color3.fromRGB(24, 30, 42)
             card.BackgroundTransparency = 0.35
             card.BorderSizePixel = 0
             card.LayoutOrder = itemOrder
             local cCorner = Instance.new("UICorner")
-            cCorner.CornerRadius = UDim.new(0, 10)
+            cCorner.CornerRadius = UDim.new(0, 8)
             cCorner.Parent = card
             local cStroke = Instance.new("UIStroke")
             cStroke.Color = Color3.fromRGB(255, 255, 255)
@@ -1148,7 +1160,7 @@ function Pluto:CreateWindow(config)
             card.Parent = page
 
             local titleLbl = Instance.new("TextLabel")
-            titleLbl.Position = UDim2.new(0, 14, 0, 14)
+            titleLbl.Position = UDim2.new(0, 14, 0, 12)
             titleLbl.Size = UDim2.new(0.4, 0, 0, 20)
             titleLbl.BackgroundTransparency = 1
             titleLbl.Font = Enum.Font.GothamBold
@@ -1159,7 +1171,7 @@ function Pluto:CreateWindow(config)
             titleLbl.Parent = card
 
             local tBox = Instance.new("TextBox")
-            tBox.Position = UDim2.new(0.42, 0, 0, 10)
+            tBox.Position = UDim2.new(0.42, 0, 0, 8)
             tBox.Size = UDim2.new(0.54, 0, 0, 28)
             tBox.BackgroundColor3 = Color3.fromRGB(30, 41, 59)
             tBox.BackgroundTransparency = 0.4
@@ -1204,7 +1216,7 @@ function Pluto:CreateWindow(config)
             frame.Parent = page
 
             local line1 = Instance.new("Frame")
-            line1.Size = UDim2.new(0.25, 0, 0, 1)
+            line1.Size = UDim2.new(0.24, 0, 0, 1)
             line1.Position = UDim2.new(0, 0, 0.5, 0)
             line1.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
             line1.BackgroundTransparency = 0.9
@@ -1212,8 +1224,8 @@ function Pluto:CreateWindow(config)
             line1.Parent = frame
 
             local label = Instance.new("TextLabel")
-            label.Size = UDim2.new(0.5, 0, 1, 0)
-            label.Position = UDim2.new(0.25, 0, 0, 0)
+            label.Size = UDim2.new(0.52, 0, 1, 0)
+            label.Position = UDim2.new(0.24, 0, 0, 0)
             label.BackgroundTransparency = 1
             label.Font = Enum.Font.GothamBold
             label.Text = text
@@ -1222,8 +1234,8 @@ function Pluto:CreateWindow(config)
             label.Parent = frame
 
             local line2 = Instance.new("Frame")
-            line2.Size = UDim2.new(0.25, 0, 0, 1)
-            line2.Position = UDim2.new(0.75, 0, 0.5, 0)
+            line2.Size = UDim2.new(0.24, 0, 0, 1)
+            line2.Position = UDim2.new(0.76, 0, 0.5, 0)
             line2.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
             line2.BackgroundTransparency = 0.9
             line2.BorderSizePixel = 0
@@ -1335,6 +1347,21 @@ task.spawn(function()
         end
     end)
 end)
+
+-- INITIALIZE GLOBAL & LOCAL STATE VARIABLES (SAFE DEFAULTS)
+PointStats = 1
+StatsMode = "Melee"
+FarmMode = "Farm Level"
+NameMon = "Bandit"
+Mon = "Bandit"
+NameQuest = "BanditQuest1"
+LevelQuest = 1
+CFrameQuest = CFrame.new(1059.37195, 15.4495068, 1550.4231, 0.939700544, -0, -0.341998369, 0, 1, -0, 0.341998369, 0, 0.939700544)
+CFrameMon = CFrame.new(1045.962646484375, 27.00250816345215, 1560.8203125)
+EnemyName = ""
+PosY = 15
+Pos = CFrame.new(0, 15, 0)
+
 function CheckQuest() 
     MyLevel = game:GetService("Players").LocalPlayer.Data.Level.Value
     if World1 then
@@ -3313,7 +3340,9 @@ spawn(function()
         wait(0.5)
         local player = game.Players.LocalPlayer
         if player and player:FindFirstChild("Data") and player.Data:FindFirstChild("Points") then
-            if player.Data.Points.Value >= PointStats and getgenv().AutoStats then
+            local currentPoints = player.Data.Points.Value
+            local requiredPoints = PointStats or 1
+            if currentPoints and requiredPoints and currentPoints >= requiredPoints and getgenv().AutoStats then
                 local statTypes = {
                     Melee = "Melee",
                     Defense = "Defense",
@@ -3321,9 +3350,11 @@ spawn(function()
                     Gun = "Gun",
                     Fruit = "Demon Fruit"
                 }                
-                local selectedStat = statTypes[StatsMode]
+                local selectedStat = statTypes[StatsMode or "Melee"]
                 if selectedStat then
-                    game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("AddPoint", selectedStat, PointStats)
+                    pcall(function()
+                        game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("AddPoint", selectedStat, requiredPoints)
+                    end)
                 end
             end
         end
@@ -4177,7 +4208,7 @@ spawn(function()
                     local questTitle = player.PlayerGui.Main.Quest.Container.QuestTitle.Title.Text
                     local questVisible = player.PlayerGui.Main.Quest.Visible
                     local humanoidRoot = player.Character and player.Character:FindFirstChild("HumanoidRootPart")
-                    if not string.find(questTitle, NameMon) then
+                    if NameMon and NameMon ~= "" and questTitle and not string.find(questTitle, tostring(NameMon)) then
                         getgenv().StartMagnet = false
                         game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("AbandonQuest")
                     end
@@ -4203,7 +4234,8 @@ spawn(function()
                         for _, v in pairs(enemies) do
                             if v:FindFirstChild("HumanoidRootPart") and v:FindFirstChild("Humanoid") then
                                 if v.Humanoid.Health > 0 and v.Name == Mon then
-                                    if string.find(game:GetService("Players").LocalPlayer.PlayerGui.Main.Quest.Container.QuestTitle.Title.Text, NameMon) then
+                                    local qText = pcall(function() return game:GetService("Players").LocalPlayer.PlayerGui.Main.Quest.Container.QuestTitle.Title.Text end) and game:GetService("Players").LocalPlayer.PlayerGui.Main.Quest.Container.QuestTitle.Title.Text or ""
+                            if NameMon and NameMon ~= "" and qText ~= "" and string.find(qText, tostring(NameMon)) then
                                         repeat
                                             task.wait(0.1)
                                             AutoHaki()
@@ -4479,7 +4511,7 @@ spawn(function()
     local function handleEnemySpawns()
         for _, v in pairs(game:GetService("Workspace")["_WorldOrigin"].EnemySpawns:GetChildren()) do
             for _, EnemyName in ipairs(MMon) do
-                if string.find(v.Name, EnemyName) then
+                if EnemyName and EnemyName ~= "" and v.Name and string.find(v.Name, tostring(EnemyName)) then
                     if (game.Players.LocalPlayer.Character.HumanoidRootPart.Position - v.Position).Magnitude >= 10 then
                         topos(v.CFrame * Pos)
                     end
@@ -4532,7 +4564,7 @@ spawn(function()
         if FarmMode2 == "Blox Fruit" and getgenv().MasteryFarm then
             pcall(function()
                 QuestTitle = game:GetService("Players").LocalPlayer.PlayerGui.Main.Quest.Container.QuestTitle.Title.Text
-                if not string.find(QuestTitle, NameMon) then
+                if NameMon and NameMon ~= "" and QuestTitle and not string.find(QuestTitle, tostring(NameMon)) then
                     UseSkill = false
                     Skillaimbot = false
                     game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("AbandonQuest")
@@ -4563,7 +4595,8 @@ spawn(function()
                         for i, v in pairs(game:GetService("Workspace").Enemies:GetChildren()) do
                             if v:FindFirstChild("HumanoidRootPart") and v:FindFirstChild("Humanoid") and v.Humanoid.Health > 0 then
                                 if v.Name == Mon then
-                                    if string.find(game:GetService("Players").LocalPlayer.PlayerGui.Main.Quest.Container.QuestTitle.Title.Text, NameMon) then
+                                    local qText = pcall(function() return game:GetService("Players").LocalPlayer.PlayerGui.Main.Quest.Container.QuestTitle.Title.Text end) and game:GetService("Players").LocalPlayer.PlayerGui.Main.Quest.Container.QuestTitle.Title.Text or ""
+                            if NameMon and NameMon ~= "" and qText ~= "" and string.find(qText, tostring(NameMon)) then
                                         HealthMs = v.Humanoid.MaxHealth * getgenv().Kill_At / 100
                                         repeat task.wait()
                                             if v.Humanoid.Health <= HealthMs then
@@ -4711,7 +4744,7 @@ spawn(function()
         while task.wait() do
             if FarmMode2 == "Gun" and getgenv().MasteryFarm then
                 QuestTitle = game:GetService("Players").LocalPlayer.PlayerGui.Main.Quest.Container.QuestTitle.Title.Text
-                if not string.find(QuestTitle, NameMon) then                      
+                if NameMon and NameMon ~= "" and QuestTitle and not string.find(QuestTitle, tostring(NameMon)) then                      
                     Skillaimbot = false          
                     game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("AbandonQuest")
                 end
@@ -4739,7 +4772,8 @@ spawn(function()
                             for i,v in pairs(game:GetService("Workspace").Enemies:GetChildren()) do
                                 if v.Name == Mon then
                                     repeat task.wait()
-                                        if string.find(game:GetService("Players").LocalPlayer.PlayerGui.Main.Quest.Container.QuestTitle.Title.Text, NameMon) then
+                                        local qText = pcall(function() return game:GetService("Players").LocalPlayer.PlayerGui.Main.Quest.Container.QuestTitle.Title.Text end) and game:GetService("Players").LocalPlayer.PlayerGui.Main.Quest.Container.QuestTitle.Title.Text or ""
+                            if NameMon and NameMon ~= "" and qText ~= "" and string.find(qText, tostring(NameMon)) then
                                             HealthMin = v.Humanoid.MaxHealth * getgenv().Kill_At/100
                                             if v.Humanoid.Health <= HealthMin then
                                                 EquipWeapon(SelectWeaponGun)
@@ -5095,7 +5129,7 @@ spawn(function()
                     game.StarterGui:SetCore("SendNotification", { Title = "Electric Claw Ready!", Text = "Buying Dragon Talon...", Duration = 5 })
                 elseif checkLevel("Dragon Talon", 400) then
                     local response = game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("BuyGodhuman", true)
-                    if string.find(response, "Bring") then
+                    if response and type(response) == "string" and string.find(response, "Bring") then
                         game.StarterGui:SetCore("SendNotification", { Title = "Not Enough Material", Text = "You need more resources.", Duration = 5 })
                     else
                         game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("BuyGodhuman")
@@ -5341,3 +5375,10 @@ task.spawn(function()
 end)
 
 print("🪐 PLUTO SCRIPT BLOX FRUITS EDITION LOADED SUCCESSFULLY! 🪐")
+
+-- Initial CheckQuest execution
+pcall(function()
+    if game.Players.LocalPlayer and game.Players.LocalPlayer:FindFirstChild("Data") and game.Players.LocalPlayer.Data:FindFirstChild("Level") then
+        CheckQuest()
+    end
+end)
